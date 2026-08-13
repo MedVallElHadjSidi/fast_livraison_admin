@@ -1,0 +1,99 @@
+<div class="page">
+  <button mat-button (click)="back()" class="back-btn">
+    <mat-icon>arrow_back</mat-icon> Retour aux candidatures
+  </button>
+
+  @if (loading()) {
+    <div class="loading"><mat-spinner /></div>
+  } @else if (candidature(); as c) {
+    <div class="header">
+      <div class="title-row">
+        <h1>{{ c.prenom }} {{ c.nom }}</h1>
+        <div class="status-badge" [class]="'status-' + c.status">
+          {{ c.status === 'en_attente' ? 'En attente' : c.status === 'approuve' ? 'Approuvée' : 'Rejetée' }}
+        </div>
+      </div>
+      <p>{{ c.telephone }} @if (c.email) { · {{ c.email }} }</p>
+      <p class="date">Soumise le {{ c.createdAt | date:'dd MMMM yyyy à HH:mm' }}</p>
+    </div>
+
+    <div class="grid">
+      <!-- Infos véhicule -->
+      <div class="card">
+        <h2><mat-icon>two_wheeler</mat-icon> Véhicule</h2>
+        <div class="info-row"><span>Type</span><strong>{{ c.vehicule.type }}</strong></div>
+        <div class="info-row"><span>Marque</span><strong>{{ c.vehicule.marque }}</strong></div>
+        <div class="info-row"><span>Modèle</span><strong>{{ c.vehicule.modele }}</strong></div>
+        <div class="info-row"><span>Immatriculation</span><strong>{{ c.vehicule.immatriculation }}</strong></div>
+        @if (c.vehicule.annee) {
+          <div class="info-row"><span>Année</span><strong>{{ c.vehicule.annee }}</strong></div>
+        }
+      </div>
+
+      <!-- Documents -->
+      <div class="card">
+        <h2><mat-icon>folder</mat-icon> Documents</h2>
+        @for (entry of [['photoIdentite','badge'],['permisConduite','drive_eta'],['photoVehicule','two_wheeler'],['carteGrise','description']]; track entry[0]) {
+          <div class="doc-row">
+            <mat-icon>{{ entry[1] }}</mat-icon>
+            <span>{{ docLabel(entry[0]) }}</span>
+            @if (docUrls()[entry[0]]) {
+              <button mat-stroked-button (click)="openDoc(docUrls()[entry[0]]!)">
+                <mat-icon>open_in_new</mat-icon> Voir
+              </button>
+            } @else {
+              <span class="missing">Non fourni</span>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Actions -->
+    @if (c.status === 'en_attente') {
+      <div class="actions-card">
+        <h2>Décision</h2>
+
+        @if (!showRejectForm()) {
+          <div class="action-btns">
+            <button mat-raised-button color="primary" (click)="approve()"
+                    [disabled]="approving()">
+              @if (approving()) { <mat-spinner diameter="18" /> }
+              @else { <mat-icon>check_circle</mat-icon> }
+              Approuver et créer le compte
+            </button>
+            <button mat-stroked-button color="warn" (click)="showRejectForm.set(true)">
+              <mat-icon>cancel</mat-icon>
+              Rejeter la candidature
+            </button>
+          </div>
+        } @else {
+          <div class="reject-form">
+            <mat-form-field appearance="outline">
+              <mat-label>Motif du rejet (optionnel)</mat-label>
+              <textarea matInput [value]="rejectNotes()"
+                        (input)="rejectNotes.set($any($event.target).value)"
+                        rows="3"></textarea>
+            </mat-form-field>
+            <div class="reject-btns">
+              <button mat-button (click)="showRejectForm.set(false)">Annuler</button>
+              <button mat-raised-button color="warn" (click)="reject()"
+                      [disabled]="rejecting()">
+                @if (rejecting()) { <mat-spinner diameter="18" /> }
+                @else { <mat-icon>cancel</mat-icon> }
+                Confirmer le rejet
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    @if (c.notes) {
+      <div class="notes-card">
+        <h2><mat-icon>note</mat-icon> Notes admin</h2>
+        <p>{{ c.notes }}</p>
+      </div>
+    }
+  }
+</div>

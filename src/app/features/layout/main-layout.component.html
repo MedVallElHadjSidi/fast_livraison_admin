@@ -1,0 +1,44 @@
+<mat-sidenav-container class="layout-container">
+  <mat-sidenav #drawer class="sidenav"
+               [mode]="isHandset() ? 'over' : 'side'"
+               [opened]="!isHandset()">
+    <div class="sidenav-brand">
+      <span class="logo">🚗</span>
+      <div>
+        <div class="brand-name">FastTossel</div>
+        <div class="brand-role">Administration</div>
+      </div>
+    </div>
+
+    <mat-nav-list>
+      @for (item of navItems; track item.route) {
+        <a mat-list-item [routerLink]="item.route" routerLinkActive="active"
+           (click)="isHandset() && drawer.close()">
+          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+          <span matListItemTitle>{{ item.label }}</span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <div class="sidenav-footer">
+      <button mat-button (click)="logout()" class="logout-btn">
+        <mat-icon>logout</mat-icon>
+        Déconnexion
+      </button>
+    </div>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="main-content">
+    @if (isHandset()) {
+      <mat-toolbar class="mobile-toolbar">
+        <button mat-icon-button (click)="drawer.toggle()" aria-label="Ouvrir le menu">
+          <mat-icon>menu</mat-icon>
+        </button>
+        <span class="mobile-toolbar-title">🚗 FastTossel</span>
+      </mat-toolbar>
+    }
+    <div class="content-scroll">
+      <router-outlet />
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

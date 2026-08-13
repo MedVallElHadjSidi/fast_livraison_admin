@@ -1,0 +1,66 @@
+<div class="page">
+  <h1 class="page-title">Candidatures Chauffeurs</h1>
+
+  <!-- Onglets statut -->
+  <div class="tabs">
+    @for (tab of tabs; track tab.status) {
+      <button class="tab-btn" [class.active]="activeStatus() === tab.status"
+              (click)="selectTab(tab.status)">
+        <mat-icon>{{ tab.icon }}</mat-icon>
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  @if (candidatures$ | async; as list) {
+    @if (list.length === 0) {
+      <div class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        <p>Aucune candidature {{ activeStatus() === 'en_attente' ? 'en attente' : activeStatus() === 'approuve' ? 'approuvée' : 'rejetée' }}</p>
+      </div>
+    } @else {
+      <div class="table-scroll">
+      <table mat-table [dataSource]="list" class="mat-elevation-z2">
+        <ng-container matColumnDef="nom">
+          <th mat-header-cell *matHeaderCellDef>Candidat</th>
+          <td mat-cell *matCellDef="let c">
+            <div class="candidate-name">{{ c.prenom }} {{ c.nom }}</div>
+            <div class="candidate-phone">{{ c.telephone }}</div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="telephone">
+          <th mat-header-cell *matHeaderCellDef>Type véhicule</th>
+          <td mat-cell *matCellDef="let c">
+            <mat-chip>{{ c.vehicule.type }}</mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="vehicule">
+          <th mat-header-cell *matHeaderCellDef>Véhicule</th>
+          <td mat-cell *matCellDef="let c">{{ vehiculeLabel(c) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Date</th>
+          <td mat-cell *matCellDef="let c">{{ c.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let c">
+            <a mat-stroked-button [routerLink]="['/candidatures', c.id]">
+              <mat-icon>visibility</mat-icon>
+              Voir le dossier
+            </a>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+      </div>
+    }
+  }
+</div>

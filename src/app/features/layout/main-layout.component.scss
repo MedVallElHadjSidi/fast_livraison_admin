@@ -1,0 +1,87 @@
+.layout-container { height: 100vh; }
+
+.sidenav {
+  width: 260px;
+  background: #1A1A2E;
+  border: none;
+
+  .sidenav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+
+    .logo { font-size: 32px; }
+    .brand-name { color: white; font-weight: 800; font-size: 15px; }
+    .brand-role { color: rgba(255,255,255,0.5); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  }
+
+  mat-nav-list {
+    padding: 12px 8px;
+
+    // Material's MDC list renders the label/icon color from these tokens,
+    // not from a plain `color` on the anchor — override them here so the
+    // items read white against the dark sidenav in both desktop and mobile (over) modes.
+    --mat-list-list-item-label-text-color: rgba(255,255,255,0.75);
+    --mat-list-list-item-hover-label-text-color: #fff;
+    --mat-list-list-item-focus-label-text-color: #fff;
+    --mat-list-list-item-leading-icon-color: rgba(255,255,255,0.55);
+    --mat-list-list-item-hover-leading-icon-color: #fff;
+    --mat-list-list-item-hover-state-layer-color: rgba(255,255,255,0.08);
+    --mat-list-list-item-focus-state-layer-color: rgba(255,255,255,0.08);
+
+    a[mat-list-item] {
+      border-radius: 10px;
+      margin-bottom: 4px;
+      font-weight: 500;
+
+      mat-icon { color: rgba(255,255,255,0.55); }
+
+      &.active {
+        background: rgba(255,255,255,0.1);
+        --mat-list-list-item-label-text-color: #fff;
+        mat-icon { color: #42A5F5; }
+      }
+
+      &:hover:not(.active) { background: rgba(255,255,255,0.06); }
+    }
+  }
+
+  .sidenav-footer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 12px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+
+    .logout-btn {
+      color: rgba(255,255,255,0.5);
+      width: 100%;
+      justify-content: flex-start;
+      gap: 8px;
+      &:hover { color: #EF4444; }
+    }
+  }
+}
+
+.main-content {
+  background: #F8F9FA;
+  overflow-y: auto;
+
+  .mobile-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #1A1A2E;
+    color: white;
+
+    button, mat-icon { color: white; }
+    .mobile-toolbar-title { font-weight: 800; font-size: 16px; margin-left: 4px; }
+  }
+}
+
+@media (max-width: 599px) {
+  .sidenav { width: 240px; }
+}

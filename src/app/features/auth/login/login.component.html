@@ -1,0 +1,48 @@
+<div class="login-page">
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo">🚗</div>
+      <h1>FastTossel</h1>
+      <p>Espace Administrateur</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline">
+        <mat-label>Email administrateur</mat-label>
+        <input matInput formControlName="email" type="email" autocomplete="email" />
+        <mat-icon matPrefix>email</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput formControlName="password"
+               [type]="hidePassword() ? 'password' : 'text'"
+               autocomplete="current-password" />
+        <mat-icon matPrefix>lock</mat-icon>
+        <button mat-icon-button matSuffix type="button"
+                (click)="hidePassword.set(!hidePassword())">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+      </mat-form-field>
+
+      @if (error()) {
+        <div class="error-box">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ error() }}</span>
+        </div>
+      }
+
+      <button mat-raised-button color="primary" type="submit"
+              [disabled]="form.invalid || loading()">
+        @if (loading()) {
+          <mat-spinner diameter="20" />
+        } @else {
+          <ng-container>
+            <mat-icon>login</mat-icon>
+            Se connecter
+          </ng-container>
+        }
+      </button>
+    </form>
+  </div>
+</div>
