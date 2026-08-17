@@ -1,7 +1,7 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: 'AIzaSyALKHw2yxrsMaMwquheHpvaqWlj6G5zWX4',
+    apiKey: 'AIzaSyBiEXEJFNBqZVyYcEx9jNMcxsSB5B5Epzs',
     authDomain: 'fasttossel-db55d.firebaseapp.com',
     projectId: 'fasttossel-db55d',
     storageBucket: 'fasttossel-db55d.firebasestorage.app',
