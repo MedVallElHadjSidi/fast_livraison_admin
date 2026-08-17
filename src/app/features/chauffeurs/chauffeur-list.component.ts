@@ -13,6 +13,7 @@ import { map } from 'rxjs/operators';
 import { Driver } from '../../core/models/driver.model';
 import { AddDriverDialogComponent } from './add-driver-dialog.component';
 import { CreditDriverDialogComponent } from './credit-driver-dialog.component';
+import { DriverLocationDialogComponent } from './driver-location-dialog.component';
 
 @Component({
   selector: 'app-chauffeur-list',
@@ -94,6 +95,10 @@ import { CreditDriverDialogComponent } from './credit-driver-dialog.component';
               <th mat-header-cell *matHeaderCellDef></th>
               <td mat-cell *matCellDef="let d">
                 <div class="action-btns">
+                  <button mat-stroked-button (click)="openLocation(d)">
+                    <mat-icon>my_location</mat-icon>
+                    Position
+                  </button>
                   <button mat-stroked-button (click)="openCourses(d)">
                     <mat-icon>local_shipping</mat-icon>
                     Courses
@@ -189,6 +194,14 @@ export class ChauffeurListComponent {
 
   openCourses(driver: Driver): void {
     this.router.navigate(['/chauffeurs', driver.uid, 'courses']);
+  }
+
+  openLocation(driver: Driver): void {
+    this.dialog.open(DriverLocationDialogComponent, {
+      width: '95vw',
+      maxWidth: '600px',
+      data: { driver },
+    });
   }
 
   openCreditDialog(driver: Driver): void {
