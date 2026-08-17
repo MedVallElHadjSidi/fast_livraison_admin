@@ -41,6 +41,13 @@ import { CourseService } from '../../core/services/course.service';
 
       <form [formGroup]="form" class="form">
         <mat-form-field appearance="outline" class="full">
+          <mat-label>Numéro du client</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="clientPhone" placeholder="ex: 22212345678">
+          <mat-hint>Le chauffeur pourra le voir et l'appeler</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
           <mat-label>Départ</mat-label>
           <mat-icon matPrefix>trip_origin</mat-icon>
           <input matInput formControlName="departure">
@@ -132,6 +139,7 @@ export class AddCourseDialogComponent {
   error   = signal('');
 
   form = this.fb.group({
+    clientPhone: [this.course?.clientPhone ?? '', [Validators.required, Validators.minLength(8)]],
     departure:   [this.course?.departure ?? '', Validators.required],
     destination: [this.course?.destination ?? '', Validators.required],
     date:        [(this.course?.date ?? new Date()).toISOString().slice(0, 10), Validators.required],
@@ -147,6 +155,7 @@ export class AddCourseDialogComponent {
     try {
       if (this.editing) {
         await this.svc.updateInfo(this.course!.id, {
+          clientPhone: v.clientPhone!,
           departure:   v.departure!,
           destination: v.destination!,
           date:        new Date(v.date!),
@@ -158,6 +167,7 @@ export class AddCourseDialogComponent {
           driverId:    this.driver?.uid,
           driverPhone: this.driver?.phoneNumber,
           driverName:  this.driver?.name,
+          clientPhone: v.clientPhone!,
           departure:   v.departure!,
           destination: v.destination!,
           date:        new Date(v.date!),

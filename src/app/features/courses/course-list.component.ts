@@ -53,6 +53,13 @@ import { Driver } from '../../core/models/driver.model';
               </td>
             </ng-container>
 
+            <ng-container matColumnDef="client">
+              <th mat-header-cell *matHeaderCellDef>Client</th>
+              <td mat-cell *matCellDef="let c">
+                <div class="client-phone"><mat-icon>phone</mat-icon> {{ c.clientPhone }}</div>
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="chauffeur">
               <th mat-header-cell *matHeaderCellDef>Chauffeur</th>
               <td mat-cell *matCellDef="let c">
@@ -151,6 +158,11 @@ import { Driver } from '../../core/models/driver.model';
     }
     .driver-name { font-weight: 700; color: #1A1A2E; font-size: 13px; }
     .driver-phone { font-size: 12px; color: #6B7280; }
+    .client-phone {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; color: #1A1A2E; font-weight: 600;
+      mat-icon { font-size: 15px; width: 15px; height: 15px; color: #6B7280; }
+    }
     .unassigned-badge {
       background: #FEF3C7; color: #92400E;
       border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700;
@@ -198,7 +210,7 @@ export class CourseListComponent {
   private dialog = inject(MatDialog);
   private snack  = inject(MatSnackBar);
 
-  cols = ['trajet', 'chauffeur', 'date', 'prix', 'statut', 'actions'];
+  cols = ['trajet', 'client', 'chauffeur', 'date', 'prix', 'statut', 'actions'];
   busy = signal<string | null>(null);
 
   courses$: Observable<Course[]> = this.svc.listAll();

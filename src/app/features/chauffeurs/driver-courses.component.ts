@@ -62,6 +62,13 @@ import { AddCourseDialogComponent } from './add-course-dialog.component';
               </td>
             </ng-container>
 
+            <ng-container matColumnDef="client">
+              <th mat-header-cell *matHeaderCellDef>Client</th>
+              <td mat-cell *matCellDef="let c">
+                <div class="client-phone"><mat-icon>phone</mat-icon> {{ c.clientPhone }}</div>
+              </td>
+            </ng-container>
+
             <ng-container matColumnDef="date">
               <th mat-header-cell *matHeaderCellDef>Date</th>
               <td mat-cell *matCellDef="let c">{{ c.date | date:'dd/MM/yyyy' }}</td>
@@ -155,6 +162,11 @@ import { AddCourseDialogComponent } from './add-course-dialog.component';
       font-size: 12px; color: #6B7280;
       mat-icon { font-size: 14px; width: 14px; height: 14px; }
     }
+    .client-phone {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; color: #1A1A2E; font-weight: 600;
+      mat-icon { font-size: 15px; width: 15px; height: 15px; color: #6B7280; }
+    }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
       &.status-en_cours { background: #E0E7FF; color: #4338CA; }
@@ -200,7 +212,7 @@ export class DriverCoursesComponent {
   private dialog    = inject(MatDialog);
   private snack     = inject(MatSnackBar);
 
-  cols = ['trajet', 'date', 'prix', 'statut', 'actions'];
+  cols = ['trajet', 'client', 'date', 'prix', 'statut', 'actions'];
   busy = signal<string | null>(null);
 
   private driverId = this.route.snapshot.paramMap.get('id')!;

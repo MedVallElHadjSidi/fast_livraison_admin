@@ -5,6 +5,7 @@ export interface Course {
   driverId?: string;
   driverPhone?: string;
   driverName?: string;
+  clientPhone: string;
   departure: string;
   destination: string;
   date: Date;

@@ -27,6 +27,7 @@ export class CourseService {
       driverId:    data['driverId'] as string | undefined,
       driverPhone: data['driverPhone'] as string | undefined,
       driverName:  data['driverName'] as string | undefined,
+      clientPhone: data['clientPhone'] as string,
       departure:   data['departure'] as string,
       destination: data['destination'] as string,
       date:        this.toDate(data['date']),
@@ -61,13 +62,14 @@ export class CourseService {
 
   async create(data: {
     driverId?: string; driverPhone?: string; driverName?: string;
-    departure: string; destination: string; date: Date; prix: number;
+    clientPhone: string; departure: string; destination: string; date: Date; prix: number;
   }): Promise<string> {
     const ref = doc(collection(this.firestore, 'courses'));
     await setDoc(ref, {
       driverId:    data.driverId ?? null,
       driverPhone: data.driverPhone ?? null,
       driverName:  data.driverName ?? null,
+      clientPhone: data.clientPhone,
       departure:   data.departure,
       destination: data.destination,
       date:        Timestamp.fromDate(data.date),
@@ -80,9 +82,10 @@ export class CourseService {
   }
 
   async updateInfo(courseId: string, data: {
-    departure: string; destination: string; date: Date; prix: number;
+    clientPhone: string; departure: string; destination: string; date: Date; prix: number;
   }): Promise<void> {
     await updateDoc(doc(this.firestore, 'courses', courseId), {
+      clientPhone: data.clientPhone,
       departure:   data.departure,
       destination: data.destination,
       date:        Timestamp.fromDate(data.date),
