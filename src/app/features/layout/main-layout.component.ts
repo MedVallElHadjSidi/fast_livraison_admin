@@ -35,6 +35,7 @@ export class MainLayoutComponent {
     { label: 'Chauffeurs',      icon: 'two_wheeler',      route: '/chauffeurs'        },
     { label: 'Courses',        icon: 'local_shipping',   route: '/courses'           },
     { label: 'Lancer une course', icon: 'delivery_dining', route: '/courses/nouvelle' },
+    { label: 'Transactions',   icon: 'receipt_long',    route: '/transactions'      },
   ];
 
   logout(): void { this.authSvc.logout(); }

@@ -50,6 +50,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/courses/course-create.component').then(m => m.CourseCreateComponent),
       },
+      {
+        path: 'transactions',
+        loadComponent: () =>
+          import('./features/transactions/transaction-list.component').then(m => m.TransactionListComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'dashboard' },
