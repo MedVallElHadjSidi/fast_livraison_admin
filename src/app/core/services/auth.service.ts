@@ -41,12 +41,26 @@ export class AuthService {
     return null;
   }
 
+  // Ramène un numéro à un format unique quelle que soit la façon dont il est
+  // tapé (avec ou sans indicatif "222", avec un "00" international, avec des
+  // espaces...) — indispensable pour que l'inscription et une reconnexion
+  // ultérieure dérivent TOUJOURS le même identifiant Firebase, même si le
+  // vendeur ne retape pas son numéro exactement de la même façon les deux fois.
+  private normalizePhoneDigits(raw: string): string {
+    let digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('00')) digits = digits.slice(2);
+    // Numéro local mauritanien à 8 chiffres, sans indicatif → on l'ajoute.
+    if (digits.length === 8) digits = `222${digits}`;
+    return digits;
+  }
+
   // Un identifiant sans '@' composé majoritairement de chiffres est un
   // numéro de téléphone vendeur ; sinon c'est l'email admin tel quel.
   // (Les chauffeurs, eux, ne se connectent jamais à cette app admin.)
   private toEmail(identifier: string): string {
-    const digits = identifier.replace(/\D/g, '');
-    if (!identifier.includes('@') && digits.length >= 6) {
+    if (identifier.includes('@')) return identifier;
+    const digits = this.normalizePhoneDigits(identifier);
+    if (digits.length >= 6) {
       return `${digits}@vendeur.fasttawassol.mr`;
     }
     return identifier;
