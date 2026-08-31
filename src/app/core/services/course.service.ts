@@ -1,13 +1,13 @@
 import { Injectable, inject } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, setDoc, updateDoc,
+  Firestore, collection, collectionData, doc, setDoc, updateDoc, runTransaction,
   query, where, orderBy, Timestamp, serverTimestamp,
 } from '@angular/fire/firestore';
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Course, CourseStatus } from '../models/course.model';
+import { Course, CourseStatus, ProductOrderStatus } from '../models/course.model';
 
 @Injectable({ providedIn: 'root' })
 export class CourseService {
@@ -24,18 +24,22 @@ export class CourseService {
   private fromDoc(id: string, data: Record<string, unknown>): Course {
     return {
       id,
-      driverId:    data['driverId'] as string | undefined,
-      driverPhone: data['driverPhone'] as string | undefined,
-      driverName:  data['driverName'] as string | undefined,
-      clientPhone: data['clientPhone'] as string,
-      departure:   data['departure'] as string,
-      destination: data['destination'] as string,
-      date:        this.toDate(data['date']),
-      prix:        data['prix'] as number,
-      commission:  data['commission'] as number | undefined,
-      status:      data['status'] as CourseStatus,
-      createdAt:   this.toDate(data['createdAt']),
-      updatedAt:   data['updatedAt'] ? this.toDate(data['updatedAt']) : undefined,
+      driverId:        data['driverId'] as string | undefined,
+      driverPhone:      data['driverPhone'] as string | undefined,
+      driverName:       data['driverName'] as string | undefined,
+      clientPhone:      data['clientPhone'] as string,
+      departure:        data['departure'] as string,
+      destination:      data['destination'] as string,
+      date:             this.toDate(data['date']),
+      prix:             data['prix'] as number,
+      commission:       data['commission'] as number | undefined,
+      status:           data['status'] as CourseStatus,
+      productId:        data['productId'] as string | undefined,
+      productName:      data['productName'] as string | undefined,
+      productQuantity:  data['productQuantity'] as number | undefined,
+      productStatus:    data['productStatus'] as ProductOrderStatus | undefined,
+      createdAt:        this.toDate(data['createdAt']),
+      updatedAt:        data['updatedAt'] ? this.toDate(data['updatedAt']) : undefined,
     };
   }
 
@@ -63,9 +67,10 @@ export class CourseService {
   async create(data: {
     driverId?: string; driverPhone?: string; driverName?: string;
     clientPhone: string; departure: string; destination: string; date: Date; prix: number;
+    productId?: string; productQuantity?: number;
   }): Promise<string> {
     const ref = doc(collection(this.firestore, 'courses'));
-    await setDoc(ref, {
+    const base = {
       driverId:    data.driverId ?? null,
       driverPhone: data.driverPhone ?? null,
       driverName:  data.driverName ?? null,
@@ -77,7 +82,33 @@ export class CourseService {
       status:      'en_cours' as CourseStatus,
       createdAt:   serverTimestamp(),
       createdBy:   this.auth.currentUser?.uid ?? '',
-    });
+    };
+
+    if (data.productId && data.productQuantity) {
+      // Réservation de stock atomique : impossible de créer la commande sans
+      // décrémenter la quantité disponible, ni l'inverse.
+      const productRef = doc(this.firestore, 'products', data.productId);
+      await runTransaction(this.firestore, async txn => {
+        const snap = await txn.get(productRef);
+        if (!snap.exists()) throw new Error('Produit introuvable');
+        const product = snap.data();
+        const available = (product['quantity'] as number) ?? 0;
+        if (available < data.productQuantity!) {
+          throw new Error(`Stock insuffisant (${available} disponible(s))`);
+        }
+        txn.update(productRef, { quantity: available - data.productQuantity! });
+        txn.set(ref, {
+          ...base,
+          productId:       data.productId,
+          productName:     product['name'],
+          productQuantity: data.productQuantity,
+          productStatus:   'en_instance' as ProductOrderStatus,
+        });
+      });
+    } else {
+      await setDoc(ref, base);
+    }
+
     return ref.id;
   }
 
@@ -100,5 +131,12 @@ export class CourseService {
     const fn = httpsCallable<unknown, { commission: number | null }>(this.functions, 'update_course_status');
     const result = await fn({ courseId, status, driverId });
     return result.data;
+  }
+
+  async updateProductStatus(courseId: string, status: ProductOrderStatus): Promise<void> {
+    await updateDoc(doc(this.firestore, 'courses', courseId), {
+      productStatus: status,
+      updatedAt:     serverTimestamp(),
+    });
   }
 }

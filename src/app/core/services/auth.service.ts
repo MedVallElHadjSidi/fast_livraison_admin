@@ -1,8 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { Auth, signInWithEmailAndPassword, signOut, user } from '@angular/fire/auth';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, user } from '@angular/fire/auth';
+import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { from, Observable } from 'rxjs';
+import { Observable, of, from, BehaviorSubject, combineLatest } from 'rxjs';
+import { switchMap, shareReplay, map } from 'rxjs/operators';
+
+export type UserRole = 'admin' | 'vendor' | null;
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,15 +16,68 @@ export class AuthService {
 
   readonly user$ = user(this.auth);
 
-  async login(email: string, password: string): Promise<void> {
-    const cred = await signInWithEmailAndPassword(this.auth, email, password);
-    // Verify the user has admin role in Firestore.
-    const snap = await getDoc(doc(this.firestore, 'admins', cred.user.uid));
-    if (!snap.exists()) {
-      await signOut(this.auth);
-      throw new Error('Accès refusé. Ce compte n\'est pas administrateur.');
+  // Permet de forcer une nouvelle résolution du rôle sans attendre un
+  // événement d'auth (ex : juste après l'inscription vendeur, où la fiche
+  // Firestore est créée APRÈS l'événement de connexion — sans ce levier,
+  // role$ resterait bloqué sur la valeur résolue avant que la fiche existe).
+  private roleRefresh$ = new BehaviorSubject<void>(undefined);
+
+  // Résolu à chaque changement d'état d'authentification (login, rechargement
+  // de page, logout) — pas seulement au moment du login() — pour que les
+  // guards restent corrects après un rafraîchissement.
+  readonly role$: Observable<UserRole> = combineLatest([this.user$, this.roleRefresh$]).pipe(
+    map(([u]) => u),
+    switchMap(u => (u ? from(this.resolveRole(u.uid)) : of(null))),
+    shareReplay(1),
+  );
+
+  readonly role = toSignal(this.role$, { initialValue: null as UserRole });
+
+  private async resolveRole(uid: string): Promise<UserRole> {
+    const adminSnap = await getDoc(doc(this.firestore, 'admins', uid));
+    if (adminSnap.exists()) return 'admin';
+    const vendorSnap = await getDoc(doc(this.firestore, 'vendors', uid));
+    if (vendorSnap.exists()) return 'vendor';
+    return null;
+  }
+
+  // Un identifiant sans '@' composé majoritairement de chiffres est un
+  // numéro de téléphone vendeur ; sinon c'est l'email admin tel quel.
+  // (Les chauffeurs, eux, ne se connectent jamais à cette app admin.)
+  private toEmail(identifier: string): string {
+    const digits = identifier.replace(/\D/g, '');
+    if (!identifier.includes('@') && digits.length >= 6) {
+      return `${digits}@vendeur.fasttawassol.mr`;
     }
-    await this.router.navigate(['/dashboard']);
+    return identifier;
+  }
+
+  async login(identifier: string, password: string): Promise<void> {
+    const email = this.toEmail(identifier);
+    const cred = await signInWithEmailAndPassword(this.auth, email, password);
+    const role = await this.resolveRole(cred.user.uid);
+    if (!role) {
+      await signOut(this.auth);
+      throw new Error("Accès refusé. Ce compte n'a pas de rôle reconnu.");
+    }
+    await this.router.navigate([role === 'admin' ? '/dashboard' : '/produits']);
+  }
+
+  async signupVendor(data: { nom: string; telephone: string; email: string; password: string }): Promise<void> {
+    // Identifiant de connexion = téléphone (converti en pseudo-email), comme
+    // pour un vendeur créé par l'admin — l'email saisi n'est qu'une
+    // coordonnée de contact stockée sur la fiche, pas l'identifiant Auth.
+    const authEmail = this.toEmail(data.telephone);
+    const cred = await createUserWithEmailAndPassword(this.auth, authEmail, data.password);
+    await setDoc(doc(this.firestore, 'vendors', cred.user.uid), {
+      uid:         cred.user.uid,
+      name:        data.nom,
+      phoneNumber: data.telephone,
+      email:       data.email,
+      createdAt:   serverTimestamp(),
+    });
+    this.roleRefresh$.next();
+    await this.router.navigate(['/produits']);
   }
 
   async logout(): Promise<void> {

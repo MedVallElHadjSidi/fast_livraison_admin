@@ -11,7 +11,7 @@
     </div>
 
     <mat-nav-list>
-      @for (item of navItems; track item.route) {
+      @for (item of navItems(); track item.route) {
         <a mat-list-item [routerLink]="item.route" routerLinkActive="active"
            (click)="isHandset() && drawer.close()">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>

@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,7 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
   selector: 'app-login',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    RouterLink, ReactiveFormsModule,
     MatFormFieldModule, MatInputModule, MatButtonModule,
     MatIconModule, MatProgressSpinnerModule,
   ],
@@ -23,7 +24,7 @@ export class LoginComponent {
   private authSvc = inject(AuthService);
 
   form = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
+    identifier: ['', Validators.required],
     password: ['', Validators.required],
   });
 
@@ -37,7 +38,7 @@ export class LoginComponent {
     this.error.set('');
     try {
       await this.authSvc.login(
-        this.form.value.email!,
+        this.form.value.identifier!,
         this.form.value.password!,
       );
     } catch (e: unknown) {

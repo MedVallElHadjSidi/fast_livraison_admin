@@ -3,14 +3,14 @@
     <div class="brand">
       <div class="logo">🚗</div>
       <h1>FastTossel</h1>
-      <p>Espace Administrateur</p>
+      <p>Administration &amp; Vendeurs</p>
     </div>
 
     <form [formGroup]="form" (ngSubmit)="submit()">
       <mat-form-field appearance="outline">
-        <mat-label>Email administrateur</mat-label>
-        <input matInput formControlName="email" type="email" autocomplete="email" />
-        <mat-icon matPrefix>email</mat-icon>
+        <mat-label>Email (admin) ou téléphone (vendeur)</mat-label>
+        <input matInput formControlName="identifier" type="text" autocomplete="username" />
+        <mat-icon matPrefix>person</mat-icon>
       </mat-form-field>
 
       <mat-form-field appearance="outline">
@@ -44,5 +44,7 @@
         }
       </button>
     </form>
+
+    <a class="back-link" routerLink="/inscription-vendeur">Pas encore de compte vendeur ? S'inscrire</a>
   </div>
 </div>

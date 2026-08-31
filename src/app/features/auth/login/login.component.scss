@@ -79,3 +79,14 @@ form {
 
   mat-icon { font-size: 18px; height: 18px; width: 18px; }
 }
+
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: #1565C0;
+  text-decoration: none;
+
+  &:hover { text-decoration: underline; }
+}

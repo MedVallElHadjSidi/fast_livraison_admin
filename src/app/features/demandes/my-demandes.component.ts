@@ -1,0 +1,79 @@
+import { Component, inject } from '@angular/core';
+import { AsyncPipe, DatePipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { Auth } from '@angular/fire/auth';
+import { Observable } from 'rxjs';
+import { Demande, DEMANDE_STATUS_LABEL, DemandeStatus } from '../../core/models/demande.model';
+import { DemandeService } from '../../core/services/demande.service';
+
+@Component({
+  selector: 'app-my-demandes',
+  standalone: true,
+  imports: [AsyncPipe, DatePipe, MatIconModule],
+  template: `
+    <div class="page">
+      <h1 class="page-title">Mes demandes de livraison</h1>
+
+      @if (demandes$ | async; as list) {
+        @if (list.length === 0) {
+          <div class="empty">
+            <mat-icon>local_shipping</mat-icon>
+            <p>Aucune demande — utilise le bouton camion sur un produit pour en créer une</p>
+          </div>
+        } @else {
+          <div class="list">
+            @for (d of list; track d.id) {
+              <div class="card">
+                <div class="info">
+                  <div class="name">{{ d.productName }}</div>
+                  <div class="meta">Quantité : {{ d.quantity }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+                <span class="status-badge" [class]="'status-' + d.status">
+                  {{ statusLabel(d.status) }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  `,
+  styles: [`
+    .page { padding: 32px; max-width: 800px; }
+    .page-title { font-size: 26px; font-weight: 900; color: #1A1A2E; margin: 0 0 24px; }
+    .list { display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      background: white; border-radius: 14px; padding: 16px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .name { font-weight: 700; color: #1A1A2E; font-size: 14px; }
+    .meta { font-size: 12px; color: #6B7280; margin-top: 2px; }
+    .status-badge {
+      padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; flex-shrink: 0;
+      &.status-en_cours { background: #E0E7FF; color: #4338CA; }
+      &.status-en_route { background: #CFFAFE; color: #0E7490; }
+      &.status-terminee { background: #D1FAE5; color: #065F46; }
+      &.status-annulee  { background: #FEE2E2; color: #991B1B; }
+    }
+    .empty {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 12px; padding: 64px; color: #9CA3AF;
+      mat-icon { font-size: 48px; width: 48px; height: 48px; }
+      p { margin: 0; font-size: 15px; text-align: center; }
+    }
+    @media (max-width: 599px) {
+      .page { padding: 16px; }
+      .page-title { font-size: 20px; }
+      .card { flex-direction: column; align-items: flex-start; gap: 8px; }
+    }
+  `],
+})
+export class MyDemandesComponent {
+  private svc  = inject(DemandeService);
+  private auth = inject(Auth);
+
+  demandes$: Observable<Demande[]> = this.svc.listMine(this.auth.currentUser?.uid ?? '');
+
+  statusLabel(status: DemandeStatus): string { return DEMANDE_STATUS_LABEL[status]; }
+}

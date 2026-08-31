@@ -1,5 +1,9 @@
 export type CourseStatus = 'en_cours' | 'accepter' | 'en_route' | 'a_bord' | 'terminer' | 'annulee';
 
+// Commande produit liée à une course — suivi séparé du cycle de la course
+// elle-même (en_cours→accepter→...), géré indépendamment par l'admin.
+export type ProductOrderStatus = 'en_instance' | 'recue' | 'envoyer' | 'terminee';
+
 export interface Course {
   id: string;
   driverId?: string;
@@ -12,6 +16,10 @@ export interface Course {
   prix: number;
   commission?: number;
   status: CourseStatus;
+  productId?: string;
+  productName?: string;
+  productQuantity?: number;
+  productStatus?: ProductOrderStatus;
   createdAt: Date;
   updatedAt?: Date;
 }
@@ -47,6 +55,26 @@ export const COURSE_STATUS_LABEL: Record<CourseStatus, string> = {
   a_bord:   'À bord',
   terminer: 'Terminée',
   annulee:  'Annulée',
+};
+
+// en_instance (attente validation admin) → recue → envoyer → terminee.
+export const PRODUCT_NEXT_STATUS: Partial<Record<ProductOrderStatus, ProductOrderStatus>> = {
+  en_instance: 'recue',
+  recue:       'envoyer',
+  envoyer:     'terminee',
+};
+
+export const PRODUCT_NEXT_LABEL: Partial<Record<ProductOrderStatus, string>> = {
+  en_instance: 'Valider (reçue)',
+  recue:       'Marquer envoyée',
+  envoyer:     'Marquer terminée',
+};
+
+export const PRODUCT_STATUS_LABEL: Record<ProductOrderStatus, string> = {
+  en_instance: 'En instance',
+  recue:       'Reçue',
+  envoyer:     'Envoyée',
+  terminee:    'Terminée',
 };
 
 export function courseWhatsAppUrl(course: Course): string {
