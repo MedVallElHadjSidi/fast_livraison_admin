@@ -180,7 +180,8 @@ export class ProductListComponent {
   openRequestDelivery(product: Product): void {
     this.dialog.open(RequestDeliveryDialogComponent, {
       width: '95vw',
-      maxWidth: '400px',
+      maxWidth: '460px',
+      maxHeight: '90vh',
       disableClose: true,
       data: { product },
     });

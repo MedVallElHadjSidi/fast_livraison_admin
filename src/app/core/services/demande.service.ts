@@ -6,7 +6,7 @@ import {
 import { Functions, httpsCallable } from '@angular/fire/functions';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Demande, DemandeStatus } from '../models/demande.model';
+import { Demande, DemandeStatus, DemandePaymentMethod } from '../models/demande.model';
 
 @Injectable({ providedIn: 'root' })
 export class DemandeService {
@@ -28,10 +28,11 @@ export class DemandeService {
       productId:   data['productId'] as string,
       productName: data['productName'] as string,
       quantity:    data['quantity'] as number,
-      clientPhone: data['clientPhone'] as string,
-      departure:   data['departure'] as string,
-      destination: data['destination'] as string,
-      status:      data['status'] as DemandeStatus,
+      clientPhone:   data['clientPhone'] as string,
+      departure:     data['departure'] as string,
+      destination:   data['destination'] as string,
+      paymentMethod: data['paymentMethod'] as DemandePaymentMethod,
+      status:        data['status'] as DemandeStatus,
       createdAt:   this.toDate(data['createdAt']),
       updatedAt:   data['updatedAt'] ? this.toDate(data['updatedAt']) : undefined,
     };
@@ -61,20 +62,22 @@ export class DemandeService {
     vendorId: string; vendorName?: string; vendorPhone?: string;
     productId: string; productName: string; quantity: number;
     clientPhone: string; departure: string; destination: string;
+    paymentMethod: DemandePaymentMethod;
   }): Promise<string> {
     const ref = doc(collection(this.firestore, 'demandes'));
     await setDoc(ref, {
-      vendorId:    data.vendorId,
-      vendorName:  data.vendorName ?? null,
-      vendorPhone: data.vendorPhone ?? null,
-      productId:   data.productId,
-      productName: data.productName,
-      quantity:    data.quantity,
-      clientPhone: data.clientPhone,
-      departure:   data.departure,
-      destination: data.destination,
-      status:      'en_cours' as DemandeStatus,
-      createdAt:   serverTimestamp(),
+      vendorId:      data.vendorId,
+      vendorName:    data.vendorName ?? null,
+      vendorPhone:   data.vendorPhone ?? null,
+      productId:     data.productId,
+      productName:   data.productName,
+      quantity:      data.quantity,
+      clientPhone:   data.clientPhone,
+      departure:     data.departure,
+      destination:   data.destination,
+      paymentMethod: data.paymentMethod,
+      status:        'en_cours' as DemandeStatus,
+      createdAt:     serverTimestamp(),
     });
     return ref.id;
   }

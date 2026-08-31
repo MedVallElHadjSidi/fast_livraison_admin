@@ -10,8 +10,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
-  Demande, DemandeStatus,
+  Demande, DemandeStatus, DemandePaymentMethod,
   DEMANDE_NEXT_STATUS, DEMANDE_NEXT_LABEL, DEMANDE_CANCELLABLE, DEMANDE_STATUS_LABEL,
+  DEMANDE_PAYMENT_METHOD_LABEL,
 } from '../../core/models/demande.model';
 import { DemandeService } from '../../core/services/demande.service';
 
@@ -92,6 +93,13 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="paiement">
+            <th mat-header-cell *matHeaderCellDef>Paiement</th>
+            <td mat-cell *matCellDef="let d">
+              <span class="payment-badge">{{ paymentLabel(d.paymentMethod) }}</span>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let d">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -161,7 +169,7 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       &.status-annulee .value  { color: #991B1B; }
     }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-    table { width: 100%; min-width: 960px; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; min-width: 1080px; border-radius: 12px; overflow: hidden; }
     .prod-name { font-weight: 700; color: #1A1A2E; font-size: 13px; }
     .prod-qty { font-size: 12px; color: #6B7280; }
     .vendor-name { font-weight: 600; color: #1A1A2E; font-size: 13px; }
@@ -176,6 +184,10 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       display: flex; align-items: center; gap: 4px;
       font-size: 13px; color: #1A1A2E; font-weight: 600;
       mat-icon { font-size: 15px; width: 15px; height: 15px; color: #6B7280; }
+    }
+    .payment-badge {
+      background: #F0FDF4; color: #15803D;
+      border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 700;
     }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
@@ -209,7 +221,7 @@ export class DemandeListComponent {
   private svc    = inject(DemandeService);
   private snack  = inject(MatSnackBar);
 
-  cols = ['produit', 'vendeur', 'trajet', 'client', 'date', 'statut', 'actions'];
+  cols = ['produit', 'vendeur', 'trajet', 'client', 'paiement', 'date', 'statut', 'actions'];
   statuses: DemandeStatus[] = ['en_cours', 'en_route', 'terminee', 'annulee'];
   busy = signal<string | null>(null);
 
@@ -231,6 +243,7 @@ export class DemandeListComponent {
   });
 
   statusLabel(status: DemandeStatus): string { return DEMANDE_STATUS_LABEL[status]; }
+  paymentLabel(method: DemandePaymentMethod): string { return DEMANDE_PAYMENT_METHOD_LABEL[method]; }
   nextLabel(status: DemandeStatus): string | undefined { return DEMANDE_NEXT_LABEL[status]; }
   canCancel(status: DemandeStatus): boolean { return DEMANDE_CANCELLABLE.has(status); }
 

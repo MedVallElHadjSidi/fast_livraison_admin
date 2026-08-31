@@ -3,7 +3,10 @@ import { AsyncPipe, DatePipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
-import { Demande, DEMANDE_STATUS_LABEL, DemandeStatus } from '../../core/models/demande.model';
+import {
+  Demande, DEMANDE_STATUS_LABEL, DemandeStatus,
+  DEMANDE_PAYMENT_METHOD_LABEL, DemandePaymentMethod,
+} from '../../core/models/demande.model';
 import { DemandeService } from '../../core/services/demande.service';
 
 @Component({
@@ -33,6 +36,7 @@ import { DemandeService } from '../../core/services/demande.service';
                   <div class="meta">
                     <mat-icon>phone</mat-icon> {{ d.clientPhone }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}
                   </div>
+                  <span class="payment-badge">{{ paymentLabel(d.paymentMethod) }}</span>
                 </div>
                 <span class="status-badge" [class]="'status-' + d.status">
                   {{ statusLabel(d.status) }}
@@ -65,6 +69,11 @@ import { DemandeService } from '../../core/services/demande.service';
       font-size: 12px; color: #6B7280; margin-top: 4px;
       mat-icon { font-size: 14px; width: 14px; height: 14px; }
     }
+    .payment-badge {
+      display: inline-block; margin-top: 6px;
+      background: #F0FDF4; color: #15803D;
+      border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700;
+    }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; flex-shrink: 0;
       &.status-en_cours { background: #E0E7FF; color: #4338CA; }
@@ -92,4 +101,5 @@ export class MyDemandesComponent {
   demandes$: Observable<Demande[]> = this.svc.listMine(this.auth.currentUser?.uid ?? '');
 
   statusLabel(status: DemandeStatus): string { return DEMANDE_STATUS_LABEL[status]; }
+  paymentLabel(method: DemandePaymentMethod): string { return DEMANDE_PAYMENT_METHOD_LABEL[method]; }
 }
