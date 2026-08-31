@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { Auth } from '@angular/fire/auth';
 import { Observable } from 'rxjs';
@@ -12,7 +12,7 @@ import { DemandeService } from '../../core/services/demande.service';
 @Component({
   selector: 'app-my-demandes',
   standalone: true,
-  imports: [AsyncPipe, DatePipe, MatIconModule],
+  imports: [AsyncPipe, DatePipe, DecimalPipe, MatIconModule],
   template: `
     <div class="page">
       <h1 class="page-title">Mes demandes de livraison</h1>
@@ -36,7 +36,10 @@ import { DemandeService } from '../../core/services/demande.service';
                   <div class="meta">
                     <mat-icon>phone</mat-icon> {{ d.clientPhone }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}
                   </div>
-                  <span class="payment-badge">{{ paymentLabel(d.paymentMethod) }}</span>
+                  <div class="badges">
+                    <span class="amount-badge">{{ d.amount | number:'1.0-0' }} MRU</span>
+                    <span class="payment-badge">{{ paymentLabel(d.paymentMethod) }}</span>
+                  </div>
                 </div>
                 <span class="status-badge" [class]="'status-' + d.status">
                   {{ statusLabel(d.status) }}
@@ -69,9 +72,15 @@ import { DemandeService } from '../../core/services/demande.service';
       font-size: 12px; color: #6B7280; margin-top: 4px;
       mat-icon { font-size: 14px; width: 14px; height: 14px; }
     }
+    .badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
     .payment-badge {
-      display: inline-block; margin-top: 6px;
+      display: inline-block;
       background: #F0FDF4; color: #15803D;
+      border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700;
+    }
+    .amount-badge {
+      display: inline-block;
+      background: #EFF6FF; color: #1D4ED8;
       border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700;
     }
     .status-badge {

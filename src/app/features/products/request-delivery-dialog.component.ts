@@ -1,5 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { DecimalPipe } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -20,7 +22,7 @@ import { VendorService } from '../../core/services/vendor.service';
   selector: 'app-request-delivery-dialog',
   standalone: true,
   imports: [
-    ReactiveFormsModule,
+    ReactiveFormsModule, DecimalPipe,
     MatDialogModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatRadioModule,
     MatProgressSpinnerModule, MatStepperModule,
@@ -48,6 +50,11 @@ import { VendorService } from '../../core/services/vendor.service';
                 <mat-label>Quantité demandée</mat-label>
                 <input matInput type="number" formControlName="quantity" min="1">
               </mat-form-field>
+
+              <div class="amount-chip">
+                <mat-icon>payments</mat-icon>
+                <span>Montant : <strong>{{ amount() | number:'1.0-0' }} MRU</strong></span>
+              </div>
 
               <mat-form-field appearance="outline" class="full">
                 <mat-label>Numéro du client</mat-label>
@@ -78,6 +85,11 @@ import { VendorService } from '../../core/services/vendor.service';
 
           <mat-step label="Mode de paiement" state="paiement">
             <div class="step-body">
+              <div class="amount-chip">
+                <mat-icon>payments</mat-icon>
+                <span>Montant à payer : <strong>{{ amount() | number:'1.0-0' }} MRU</strong></span>
+              </div>
+
               <mat-radio-group formControlName="paymentMethod" class="method-grp">
                 <mat-radio-button value="bankily_vendeur">Bankily vendeur</mat-radio-button>
                 <mat-radio-button value="bankily_fast">Bankily FAST</mat-radio-button>
@@ -139,6 +151,13 @@ import { VendorService } from '../../core/services/vendor.service';
     }
     .product-name { font-weight: 700; color: #1A1A2E; font-size: 14px; }
     .product-stock { font-size: 12px; color: #6B7280; }
+    .amount-chip {
+      display: flex; align-items: center; gap: 8px;
+      background: #EFF6FF; color: #1D4ED8;
+      border-radius: 10px; padding: 10px 14px; font-size: 13px;
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+      strong { font-size: 14px; }
+    }
     .error-box {
       display: flex; align-items: center; gap: 8px;
       background: #fef2f2; border: 1px solid #fca5a5;
@@ -167,6 +186,11 @@ export class RequestDeliveryDialogComponent {
     paymentMethod: ['bankily_vendeur' as DemandePaymentMethod, Validators.required],
   });
 
+  private quantitySig = toSignal(this.form.controls.quantity.valueChanges, {
+    initialValue: this.form.controls.quantity.value,
+  });
+  amount = () => (this.quantitySig() ?? 0) * this.product.priceWithDelivery;
+
   step1Valid(): boolean {
     const g = this.form;
     return !!(g.get('quantity')?.valid && g.get('clientPhone')?.valid
@@ -189,6 +213,7 @@ export class RequestDeliveryDialogComponent {
         productId:     this.product.id,
         productName:   this.product.name,
         quantity:      this.form.value.quantity!,
+        unitPrice:     this.product.priceWithDelivery,
         clientPhone:   this.form.value.clientPhone!,
         departure:     this.form.value.departure!,
         destination:   this.form.value.destination!,

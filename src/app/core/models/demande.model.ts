@@ -10,6 +10,8 @@ export interface Demande {
   productId: string;
   productName: string;
   quantity: number;
+  unitPrice: number;
+  amount: number;
   clientPhone: string;
   departure: string;
   destination: string;

@@ -28,6 +28,8 @@ export class DemandeService {
       productId:   data['productId'] as string,
       productName: data['productName'] as string,
       quantity:    data['quantity'] as number,
+      unitPrice:   (data['unitPrice'] as number) ?? 0,
+      amount:      (data['amount'] as number) ?? 0,
       clientPhone:   data['clientPhone'] as string,
       departure:     data['departure'] as string,
       destination:   data['destination'] as string,
@@ -60,7 +62,7 @@ export class DemandeService {
 
   async create(data: {
     vendorId: string; vendorName?: string; vendorPhone?: string;
-    productId: string; productName: string; quantity: number;
+    productId: string; productName: string; quantity: number; unitPrice: number;
     clientPhone: string; departure: string; destination: string;
     paymentMethod: DemandePaymentMethod;
   }): Promise<string> {
@@ -72,6 +74,8 @@ export class DemandeService {
       productId:     data.productId,
       productName:   data.productName,
       quantity:      data.quantity,
+      unitPrice:     data.unitPrice,
+      amount:        data.unitPrice * data.quantity,
       clientPhone:   data.clientPhone,
       departure:     data.departure,
       destination:   data.destination,

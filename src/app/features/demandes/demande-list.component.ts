@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -22,7 +22,7 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
   selector: 'app-demande-list',
   standalone: true,
   imports: [
-    DatePipe, FormsModule,
+    DatePipe, DecimalPipe, FormsModule,
     MatTableModule, MatIconModule, MatButtonModule, MatFormFieldModule, MatInputModule,
   ],
   template: `
@@ -90,6 +90,13 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
             <th mat-header-cell *matHeaderCellDef>Client</th>
             <td mat-cell *matCellDef="let d">
               <div class="client-phone"><mat-icon>phone</mat-icon> {{ d.clientPhone }}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="montant">
+            <th mat-header-cell *matHeaderCellDef>Montant</th>
+            <td mat-cell *matCellDef="let d">
+              <span class="amount-cell">{{ d.amount | number:'1.0-0' }} MRU</span>
             </td>
           </ng-container>
 
@@ -169,7 +176,7 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       &.status-annulee .value  { color: #991B1B; }
     }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-    table { width: 100%; min-width: 1080px; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; min-width: 1180px; border-radius: 12px; overflow: hidden; }
     .prod-name { font-weight: 700; color: #1A1A2E; font-size: 13px; }
     .prod-qty { font-size: 12px; color: #6B7280; }
     .vendor-name { font-weight: 600; color: #1A1A2E; font-size: 13px; }
@@ -189,6 +196,7 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       background: #F0FDF4; color: #15803D;
       border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 700;
     }
+    .amount-cell { font-weight: 800; color: #1D4ED8; font-size: 13px; }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
       &.status-en_cours { background: #E0E7FF; color: #4338CA; }
@@ -221,7 +229,7 @@ export class DemandeListComponent {
   private svc    = inject(DemandeService);
   private snack  = inject(MatSnackBar);
 
-  cols = ['produit', 'vendeur', 'trajet', 'client', 'paiement', 'date', 'statut', 'actions'];
+  cols = ['produit', 'vendeur', 'trajet', 'client', 'montant', 'paiement', 'date', 'statut', 'actions'];
   statuses: DemandeStatus[] = ['en_cours', 'en_route', 'terminee', 'annulee'];
   busy = signal<string | null>(null);
 
