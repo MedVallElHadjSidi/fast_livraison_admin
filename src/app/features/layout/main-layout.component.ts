@@ -7,7 +7,9 @@ import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../core/services/auth.service';
+import { ChangePasswordDialogComponent } from './change-password-dialog.component';
 import { map } from 'rxjs/operators';
 
 const ADMIN_NAV = [
@@ -41,13 +43,33 @@ const VENDOR_NAV = [
 export class MainLayoutComponent {
   private authSvc = inject(AuthService);
   private breakpointObserver = inject(BreakpointObserver);
+  private dialog = inject(MatDialog);
 
   isHandset = toSignal(
     this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(r => r.matches)),
     { initialValue: false },
   );
 
-  navItems = computed(() => this.authSvc.role() === 'vendor' ? VENDOR_NAV : ADMIN_NAV);
+  // Tant que le rôle n'est pas encore résolu (role() vaut null au tout
+  // premier rendu), on ne montre AUCUN item plutôt que de retomber sur
+  // ADMIN_NAV par défaut — sinon un vendeur voit brièvement le menu admin
+  // complet (Tableau de bord, Chauffeurs, Transactions...) avant le bascule.
+  navItems = computed(() => {
+    const role = this.authSvc.role();
+    if (role === 'admin') return ADMIN_NAV;
+    if (role === 'vendor') return VENDOR_NAV;
+    return [];
+  });
+
+  roleLabel = computed(() => this.authSvc.role() === 'vendor' ? 'Vendeur' : 'Administration');
+
+  openChangePassword(): void {
+    this.dialog.open(ChangePasswordDialogComponent, {
+      width: '95vw',
+      maxWidth: '400px',
+      disableClose: true,
+    });
+  }
 
   logout(): void { this.authSvc.logout(); }
 }

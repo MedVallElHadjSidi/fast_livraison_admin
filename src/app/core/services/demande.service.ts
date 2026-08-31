@@ -90,4 +90,13 @@ export class DemandeService {
     const fn = httpsCallable(this.functions, 'update_demande_status');
     await fn({ demandeId, status });
   }
+
+  /** Renseigne unitPrice/amount sur les demandes créées avant l'ajout de ce champ. */
+  async backfillAmounts(): Promise<{ updated: number; skipped: number }> {
+    const fn = httpsCallable<void, { updated: number; skipped: number }>(
+      this.functions, 'backfill_demande_amounts',
+    );
+    const res = await fn();
+    return res.data;
+  }
 }

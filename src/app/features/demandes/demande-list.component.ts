@@ -30,6 +30,11 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       <div class="page-header">
         <button mat-icon-button (click)="back()"><mat-icon>arrow_back</mat-icon></button>
         <h1 class="page-title">Demandes de livraison</h1>
+        <button mat-stroked-button [disabled]="backfilling()" (click)="backfillAmounts()"
+                title="Calculer le montant des anciennes demandes qui n'en ont pas">
+          <mat-icon>calculate</mat-icon>
+          Recalculer les montants manquants
+        </button>
       </div>
 
       <div class="filters">
@@ -158,8 +163,8 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
   `,
   styles: [`
     .page { padding: 32px; max-width: 1200px; }
-    .page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
-    .page-title { font-size: 26px; font-weight: 900; color: #1A1A2E; margin: 0; }
+    .page-header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; flex-wrap: wrap; }
+    .page-title { font-size: 26px; font-weight: 900; color: #1A1A2E; margin: 0; flex: 1; }
     .filters { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
     .stats-grid {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -232,6 +237,7 @@ export class DemandeListComponent {
   cols = ['produit', 'vendeur', 'trajet', 'client', 'montant', 'paiement', 'date', 'statut', 'actions'];
   statuses: DemandeStatus[] = ['en_cours', 'en_route', 'terminee', 'annulee'];
   busy = signal<string | null>(null);
+  backfilling = signal(false);
 
   fromDate = toDateInput(new Date());
   toDate   = toDateInput(new Date());
@@ -280,6 +286,22 @@ export class DemandeListComponent {
       this.snack.open(msg || 'Erreur lors de la mise à jour', '', { duration: 4000 });
     } finally {
       this.busy.set(null);
+    }
+  }
+
+  async backfillAmounts(): Promise<void> {
+    this.backfilling.set(true);
+    try {
+      const { updated, skipped } = await this.svc.backfillAmounts();
+      this.snack.open(
+        `${updated} demande(s) mise(s) à jour${skipped ? `, ${skipped} ignorée(s) (produit introuvable)` : ''}`,
+        '', { duration: 5000 },
+      );
+    } catch (e: unknown) {
+      const msg = (e as any)?.message ?? '';
+      this.snack.open(msg || 'Erreur lors du recalcul', '', { duration: 4000 });
+    } finally {
+      this.backfilling.set(false);
     }
   }
 

@@ -1,6 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, user } from '@angular/fire/auth';
+import {
+  Auth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, user,
+  EmailAuthProvider, reauthenticateWithCredential, updatePassword,
+} from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { Observable, of, from, BehaviorSubject, combineLatest } from 'rxjs';
@@ -92,6 +95,16 @@ export class AuthService {
     });
     this.roleRefresh$.next();
     await this.router.navigate(['/produits']);
+  }
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    const u = this.auth.currentUser;
+    if (!u || !u.email) throw new Error('Non authentifié');
+    // Firebase exige une réauthentification récente avant tout changement
+    // de mot de passe — on la fait ici avec le mot de passe actuel saisi.
+    const credential = EmailAuthProvider.credential(u.email, currentPassword);
+    await reauthenticateWithCredential(u, credential);
+    await updatePassword(u, newPassword);
   }
 
   async logout(): Promise<void> {

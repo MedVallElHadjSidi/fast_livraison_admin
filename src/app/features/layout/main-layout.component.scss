@@ -56,13 +56,14 @@
     padding: 16px 12px;
     border-top: 1px solid rgba(255,255,255,0.08);
 
-    .logout-btn {
+    .password-btn, .logout-btn {
       color: rgba(255,255,255,0.5);
       width: 100%;
       justify-content: flex-start;
       gap: 8px;
-      &:hover { color: #EF4444; }
     }
+    .password-btn { &:hover { color: #fff; } margin-bottom: 4px; }
+    .logout-btn { &:hover { color: #EF4444; } }
   }
 }
 
