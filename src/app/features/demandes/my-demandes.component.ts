@@ -25,8 +25,14 @@ import { DemandeService } from '../../core/services/demande.service';
             @for (d of list; track d.id) {
               <div class="card">
                 <div class="info">
-                  <div class="name">{{ d.productName }}</div>
-                  <div class="meta">Quantité : {{ d.quantity }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+                  <div class="name">{{ d.productName }} <span class="qty">x{{ d.quantity }}</span></div>
+                  <div class="trajet">
+                    <mat-icon>trip_origin</mat-icon> {{ d.departure }}
+                    <mat-icon>arrow_forward</mat-icon> {{ d.destination }}
+                  </div>
+                  <div class="meta">
+                    <mat-icon>phone</mat-icon> {{ d.clientPhone }} — {{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                  </div>
                 </div>
                 <span class="status-badge" [class]="'status-' + d.status">
                   {{ statusLabel(d.status) }}
@@ -48,7 +54,17 @@ import { DemandeService } from '../../core/services/demande.service';
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     .name { font-weight: 700; color: #1A1A2E; font-size: 14px; }
-    .meta { font-size: 12px; color: #6B7280; margin-top: 2px; }
+    .qty { font-weight: 600; color: #6B7280; }
+    .trajet {
+      display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+      font-size: 12px; color: #4B5563; margin-top: 4px;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
+    .meta {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; color: #6B7280; margin-top: 4px;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; flex-shrink: 0;
       &.status-en_cours { background: #E0E7FF; color: #4338CA; }

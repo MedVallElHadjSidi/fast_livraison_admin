@@ -77,6 +77,21 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
             </td>
           </ng-container>
 
+          <ng-container matColumnDef="trajet">
+            <th mat-header-cell *matHeaderCellDef>Trajet</th>
+            <td mat-cell *matCellDef="let d">
+              <div class="trajet-dep">{{ d.departure }}</div>
+              <div class="trajet-dest"><mat-icon>arrow_downward</mat-icon> {{ d.destination }}</div>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="client">
+            <th mat-header-cell *matHeaderCellDef>Client</th>
+            <td mat-cell *matCellDef="let d">
+              <div class="client-phone"><mat-icon>phone</mat-icon> {{ d.clientPhone }}</div>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="date">
             <th mat-header-cell *matHeaderCellDef>Date</th>
             <td mat-cell *matCellDef="let d">{{ d.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
@@ -146,11 +161,22 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       &.status-annulee .value  { color: #991B1B; }
     }
     .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-    table { width: 100%; min-width: 720px; border-radius: 12px; overflow: hidden; }
+    table { width: 100%; min-width: 960px; border-radius: 12px; overflow: hidden; }
     .prod-name { font-weight: 700; color: #1A1A2E; font-size: 13px; }
     .prod-qty { font-size: 12px; color: #6B7280; }
     .vendor-name { font-weight: 600; color: #1A1A2E; font-size: 13px; }
     .vendor-phone { font-size: 12px; color: #6B7280; }
+    .trajet-dep { font-weight: 700; color: #1A1A2E; font-size: 13px; }
+    .trajet-dest {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 12px; color: #6B7280;
+      mat-icon { font-size: 14px; width: 14px; height: 14px; }
+    }
+    .client-phone {
+      display: flex; align-items: center; gap: 4px;
+      font-size: 13px; color: #1A1A2E; font-weight: 600;
+      mat-icon { font-size: 15px; width: 15px; height: 15px; color: #6B7280; }
+    }
     .status-badge {
       padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
       &.status-en_cours { background: #E0E7FF; color: #4338CA; }
@@ -183,7 +209,7 @@ export class DemandeListComponent {
   private svc    = inject(DemandeService);
   private snack  = inject(MatSnackBar);
 
-  cols = ['produit', 'vendeur', 'date', 'statut', 'actions'];
+  cols = ['produit', 'vendeur', 'trajet', 'client', 'date', 'statut', 'actions'];
   statuses: DemandeStatus[] = ['en_cours', 'en_route', 'terminee', 'annulee'];
   busy = signal<string | null>(null);
 

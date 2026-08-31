@@ -8,6 +8,9 @@ export interface Demande {
   productId: string;
   productName: string;
   quantity: number;
+  clientPhone: string;
+  departure: string;
+  destination: string;
   status: DemandeStatus;
   createdAt: Date;
   updatedAt?: Date;

@@ -40,6 +40,24 @@ import { VendorService } from '../../core/services/vendor.service';
           <input matInput type="number" formControlName="quantity" min="1">
         </mat-form-field>
 
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Numéro du client</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput formControlName="clientPhone" placeholder="ex: 22212345678">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Lieu de départ</mat-label>
+          <mat-icon matPrefix>trip_origin</mat-icon>
+          <input matInput formControlName="departure">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Lieu de destination</mat-label>
+          <mat-icon matPrefix>place</mat-icon>
+          <input matInput formControlName="destination">
+        </mat-form-field>
+
         @if (error()) {
           <div class="error-box">
             <mat-icon>error_outline</mat-icon>
@@ -95,7 +113,10 @@ export class RequestDeliveryDialogComponent {
   error   = signal('');
 
   form = this.fb.group({
-    quantity: [1, [Validators.required, Validators.min(1)]],
+    quantity:    [1, [Validators.required, Validators.min(1)]],
+    clientPhone: ['', [Validators.required, Validators.minLength(8)]],
+    departure:   ['', Validators.required],
+    destination: ['', Validators.required],
   });
 
   async submit(): Promise<void> {
@@ -114,6 +135,9 @@ export class RequestDeliveryDialogComponent {
         productId:   this.product.id,
         productName: this.product.name,
         quantity:    this.form.value.quantity!,
+        clientPhone: this.form.value.clientPhone!,
+        departure:   this.form.value.departure!,
+        destination: this.form.value.destination!,
       });
       this.snack.open('Demande envoyée', '', { duration: 3000 });
       this.dialogRef.close(true);

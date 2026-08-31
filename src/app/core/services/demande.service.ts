@@ -28,6 +28,9 @@ export class DemandeService {
       productId:   data['productId'] as string,
       productName: data['productName'] as string,
       quantity:    data['quantity'] as number,
+      clientPhone: data['clientPhone'] as string,
+      departure:   data['departure'] as string,
+      destination: data['destination'] as string,
       status:      data['status'] as DemandeStatus,
       createdAt:   this.toDate(data['createdAt']),
       updatedAt:   data['updatedAt'] ? this.toDate(data['updatedAt']) : undefined,
@@ -57,6 +60,7 @@ export class DemandeService {
   async create(data: {
     vendorId: string; vendorName?: string; vendorPhone?: string;
     productId: string; productName: string; quantity: number;
+    clientPhone: string; departure: string; destination: string;
   }): Promise<string> {
     const ref = doc(collection(this.firestore, 'demandes'));
     await setDoc(ref, {
@@ -66,6 +70,9 @@ export class DemandeService {
       productId:   data.productId,
       productName: data.productName,
       quantity:    data.quantity,
+      clientPhone: data.clientPhone,
+      departure:   data.departure,
+      destination: data.destination,
       status:      'en_cours' as DemandeStatus,
       createdAt:   serverTimestamp(),
     });
