@@ -6,8 +6,8 @@ import {
 } from '@angular/fire/auth';
 import { Firestore, doc, getDoc, setDoc, serverTimestamp } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
-import { Observable, of, from, BehaviorSubject, combineLatest } from 'rxjs';
-import { switchMap, shareReplay, map } from 'rxjs/operators';
+import { Observable, of, from, BehaviorSubject, combineLatest, firstValueFrom } from 'rxjs';
+import { switchMap, shareReplay, map, filter } from 'rxjs/operators';
 
 export type UserRole = 'admin' | 'vendor' | null;
 
@@ -109,6 +109,13 @@ export class AuthService {
 
   async logout(): Promise<void> {
     await signOut(this.auth);
+    // signOut() peut se résoudre avant que le listener onAuthStateChanged
+    // n'ait propagé le nouvel état — sans cette attente, guestGuard lit
+    // parfois encore l'ancien rôle (via le cache shareReplay de role$) au
+    // moment de la navigation et renvoie l'utilisateur d'où il vient,
+    // ce qui donne l'impression qu'il faut cliquer deux fois sur Déconnexion.
+    await firstValueFrom(this.user$.pipe(filter(u => u === null)));
+    this.roleRefresh$.next();
     await this.router.navigate(['/login']);
   }
 

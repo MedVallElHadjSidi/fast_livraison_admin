@@ -40,11 +40,11 @@ function toDateInput(d: Date): string { return d.toISOString().slice(0, 10); }
       <div class="filters">
         <mat-form-field appearance="outline">
           <mat-label>Du</mat-label>
-          <input matInput type="date" [(ngModel)]="fromDate">
+          <input matInput type="date" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)">
         </mat-form-field>
         <mat-form-field appearance="outline">
           <mat-label>Au</mat-label>
-          <input matInput type="date" [(ngModel)]="toDate">
+          <input matInput type="date" [ngModel]="toDate()" (ngModelChange)="toDate.set($event)">
         </mat-form-field>
         <button mat-stroked-button (click)="resetToday()">Aujourd'hui</button>
       </div>
@@ -239,14 +239,14 @@ export class DemandeListComponent {
   busy = signal<string | null>(null);
   backfilling = signal(false);
 
-  fromDate = toDateInput(new Date());
-  toDate   = toDateInput(new Date());
+  fromDate = signal(toDateInput(new Date()));
+  toDate   = signal(toDateInput(new Date()));
 
   private demandes = toSignal(this.svc.listAll(), { initialValue: [] as Demande[] });
 
   filtered = computed(() => {
-    const from = new Date(this.fromDate + 'T00:00:00');
-    const to   = new Date(this.toDate + 'T23:59:59');
+    const from = new Date(this.fromDate() + 'T00:00:00');
+    const to   = new Date(this.toDate() + 'T23:59:59');
     return this.demandes().filter(d => d.createdAt >= from && d.createdAt <= to);
   });
 
@@ -262,8 +262,8 @@ export class DemandeListComponent {
   canCancel(status: DemandeStatus): boolean { return DEMANDE_CANCELLABLE.has(status); }
 
   resetToday(): void {
-    this.fromDate = toDateInput(new Date());
-    this.toDate   = toDateInput(new Date());
+    this.fromDate.set(toDateInput(new Date()));
+    this.toDate.set(toDateInput(new Date()));
   }
 
   async advance(demande: Demande): Promise<void> {
